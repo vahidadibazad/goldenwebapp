@@ -1,0 +1,27 @@
+{
+  "name": "subar-webapp",
+  "version": "1.0.0",
+  "description": "سیستم مدیریت آسانسور - اجرا در شبکه محلی",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' NODE_ICU_DATA=node_modules/full-icu PYTHONIOENCODING=utf-8 LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nodemon server.js",
+    "dev:win": "chcp 65001 > nul && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev -- --host",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:network": "concurrently --names \"🟢BE,🔵FE\" --prefix-colors \"green,blue\" \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0"
+  },
+  "dependencies": {
+    "chalk": "^6.0.0",
+    "kavenegar": "^1.1.4",
+    "nodemailer": "^9.0.5",
+    "redis": "^6.2.1",
+    "sharp": "^0.35.3",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  }
+}
