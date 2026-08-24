@@ -35,7 +35,7 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import crmService from '../../services/crmService';
+import crmService from "../../services/crmService";
 import { toPersianDate } from '../../utils/dateHelper';
 import { toPersianPrice } from '../../utils/numberHelper';
 import { COLORS } from '../../styles/theme';

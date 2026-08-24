@@ -1,5 +1,5 @@
 const LeadService = require('../services/leadService');
-const logAudit = require('../../../shared/utils/auditLogger');
+const logAudit = require('../../../utils/auditLogger');
 
 class LeadController {
 

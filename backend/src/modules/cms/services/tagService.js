@@ -1,6 +1,6 @@
 // backend/src/modules/cms/services/tagService.js
-const Tag = require('../../models/Tag');
-const Entry = require('../../models/Entry');
+const Tag = require('../models/Tag');
+const Entry = require('../../../models/Entry');
 const CacheService = require('../../../services/cacheService');
 
 class TagService {

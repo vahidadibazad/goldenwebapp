@@ -1,7 +1,7 @@
 // backend/src/modules/cms/services/contentService.js
-const Entry = require('../../models/Entry');
-const ContentType = require('../../models/ContentType');
-const Category = require('../../models/Category');
+const Entry = require('../../../models/Entry');
+const ContentType = require('../models/ContentType');
+const Category = require('../../../models/Category');
 const CacheService = require('../../../services/cacheService');
 const mongoose = require('mongoose');
 

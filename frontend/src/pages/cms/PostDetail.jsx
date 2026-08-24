@@ -1,7 +1,7 @@
 // frontend/src/pages/cms/PostDetail.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Spin, Typography, Divider, Tag, Button, Space, Avatar, Empty, Row, Col, Comment, Form, Input } from 'antd';
+import { Card, Spin, Typography, Divider, Tag, Button, Space, Avatar, Empty, Row, Col, Form, Input, message } from 'antd'; // ✅ Comment حذف شد
 import { CalendarOutlined, UserOutlined, EyeOutlined, ArrowLeftOutlined, LikeOutlined, DislikeOutlined } from '@ant-design/icons';
 import cmsService from '../../services/cmsService';
 import { toPersianDate } from '../../utils/dateHelper';
@@ -28,7 +28,6 @@ function PostDetail() {
         setPost(res.data.data);
         setError(null);
 
-        // دریافت کامنت‌ها
         if (res.data.data._id) {
           const commentsRes = await cmsService.getComments(res.data.data._id);
           setComments(commentsRes.data.data || []);
@@ -165,18 +164,31 @@ function PostDetail() {
 
         <Divider style={{ margin: '16px 0' }} />
 
-        {/* لیست کامنت‌ها */}
+        {/* ✅ لیست کامنت‌ها با کارت به جای Comment */}
         {comments.length === 0 ? (
           <Text type="secondary">هنوز کامنتی ثبت نشده است</Text>
         ) : (
           comments.map(comment => (
-            <Comment
+            <Card 
               key={comment._id}
-              author={comment.author?.name || comment.user?.fullName || 'ناشناس'}
-              avatar={<Avatar icon={<UserOutlined />} />}
-              content={comment.content}
-              datetime={toPersianDate(comment.createdAt)}
-            />
+              size="small"
+              style={{ marginBottom: 12, borderRadius: 8 }}
+              bodyStyle={{ padding: '12px 16px' }}
+            >
+              <Space align="start" size="middle">
+                <Avatar icon={<UserOutlined />} />
+                <div>
+                  <Text strong>{comment.author?.name || comment.user?.fullName || 'ناشناس'}</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {toPersianDate(comment.createdAt)}
+                  </Text>
+                  <Paragraph style={{ marginTop: 8, marginBottom: 0 }}>
+                    {comment.content}
+                  </Paragraph>
+                </div>
+              </Space>
+            </Card>
           ))
         )}
       </Card>

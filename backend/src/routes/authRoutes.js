@@ -1,45 +1,116 @@
 // backend/src/routes/authRoutes.js
 const router = require('express').Router();
-const AuthController = require('../controllers/authController');
-const { protect } = require('../middleware/auth');
-const { loginLimiter } = require('../config/rateLimiter');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { protect, adminOnly } = require('../middleware/auth');
 
 // =============================================
-// مسیرهای عمومی (بدون احراز هویت)
+// ✅ مسیر لاگین
 // =============================================
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-// ثبت‌نام کاربر جدید
-router.post('/register', loginLimiter, AuthController.register);
+    // پیدا کردن کاربر با populate role
+    const user = await User.findOne({ username })
+      .select('+password')
+      .populate('role');
 
-// ورود کاربر
-router.post('/login', loginLimiter, AuthController.login);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'نام کاربری یا رمز عبور اشتباه است',
+      });
+    }
 
-// تأیید ایمیل
-router.get('/verify-email', AuthController.verifyEmail);
+    // بررسی رمز عبور
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'نام کاربری یا رمز عبور اشتباه است',
+      });
+    }
 
-// ارسال مجدد ایمیل تأیید
-router.post('/resend-verification', AuthController.resendVerificationEmail);
+    // تولید توکن
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET || 'secret-key',
+      { expiresIn: '7d' }
+    );
 
-// درخواست بازنشانی رمز عبور
-router.post('/forgot-password', AuthController.forgotPassword);
+    // به‌روزرسانی آخرین ورود
+    user.lastLogin = new Date();
+    await user.save();
 
-// اجرای بازنشانی رمز عبور
-router.post('/reset-password', AuthController.resetPassword);
+    // ✅ ارسال پاسخ با نقش کامل
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user._id,
+          username: user.username,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role, // نقش به همراه populate
+        },
+      },
+      message: 'ورود با موفقیت انجام شد',
+    });
+  } catch (error) {
+    console.error('❌ خطا در لاگین:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
 
 // =============================================
-// مسیرهای محافظت‌شده (با احراز هویت)
+// ✅ دریافت اطلاعات کاربر جاری
 // =============================================
+router.get('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('-password')
+      .populate('role');
+    
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
 
-// دریافت پروفایل کاربر
-router.get('/profile', protect, AuthController.getProfile);
+// =============================================
+// ✅ دریافت لیست کاربران (فقط ادمین)
+// =============================================
+router.get('/users', protect, adminOnly, async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('-password')
+      .populate('role')
+      .sort({ createdAt: -1 });
 
-// به‌روزرسانی پروفایل
-router.put('/profile', protect, AuthController.updateProfile);
-
-// تغییر رمز عبور
-router.put('/change-password', protect, AuthController.changePassword);
-
-// خروج از سیستم
-router.post('/logout', protect, AuthController.logout);
+    res.json({
+      success: true,
+      data: users,
+      message: 'لیست کاربران با موفقیت دریافت شد',
+    });
+  } catch (error) {
+    console.error('❌ خطا در دریافت کاربران:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
 
 module.exports = router;

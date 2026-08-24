@@ -24,7 +24,7 @@ import {
   PhoneOutlined,
   GlobalOutlined,
 } from '@ant-design/icons';
-import crmService from '../../services/crmService';
+import crmService from "../../services/crmService";
 
 const { Title, Text } = Typography;
 const { Option } = Select;

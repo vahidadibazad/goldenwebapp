@@ -1,6 +1,6 @@
 // backend/src/modules/cms/services/ecommerceService.js
-const Product = require('../../models/Product');
-const Order = require('../../models/Order');
+const Product = require('../models/Product');
+const Order = require('../models/Order');
 const CacheService = require('../../../services/cacheService');
 
 class EcommerceService {

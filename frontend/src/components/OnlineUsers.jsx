@@ -1,37 +1,47 @@
-import { useSocket } from '../context/SocketContext';
-import { Avatar, Badge, Tooltip, Space } from 'antd';
+// frontend/src/components/OnlineUsers.jsx
+import React from 'react';
+import { Avatar, Tooltip, Badge } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import { useSocket } from '../context/SocketContext';
 
-function OnlineUsers() {
+const OnlineUsers = () => {
   const { onlineUsers } = useSocket();
 
-  if (onlineUsers.length === 0) return null;
+  // اگر کاربر آنلاین وجود ندارد، چیزی نمایش نده
+  if (!onlineUsers || onlineUsers.length === 0) {
+    return null;
+  }
 
   return (
-    <Space size="small" style={{ padding: '8px 12px' }}>
-      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-        آنلاین:
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* متن تعداد آنلاین */}
+      <span style={{ color: '#52c41a', fontSize: '13px', fontWeight: '500' }}>
+        ● {onlineUsers.length} آنلاین
       </span>
-      {onlineUsers.map((user) => (
-        <Tooltip key={user.userId} title={user.fullName || user.username}>
-          <Badge dot status="success" offset={[-2, 2]}>
-            <Avatar
-              size="small"
-              icon={<UserOutlined />}
-              style={{ 
-                width: 24, 
-                height: 24, 
-                fontSize: 12,
-                background: '#52c41a',
-              }}
+
+      {/* آواتار کاربران آنلاین */}
+      <Avatar.Group max={{ count: 3 }} size="small">
+        {onlineUsers.map((user) => (
+          <Tooltip key={user.id || user._id} title={user.fullName || user.username}>
+            <Badge 
+              dot 
+              color="#52c41a" 
+              offset={[-5, 5]}
+              // ✅ فقط نقطه سبز (بدون نقطه قرمز)
             >
-              {user.fullName?.charAt(0) || user.username?.charAt(0)}
-            </Avatar>
-          </Badge>
-        </Tooltip>
-      ))}
-    </Space>
+              <Avatar 
+                icon={<UserOutlined />} 
+                style={{ 
+                  backgroundColor: '#1677ff',
+                  border: '2px solid #52c41a',
+                }} 
+              />
+            </Badge>
+          </Tooltip>
+        ))}
+      </Avatar.Group>
+    </div>
   );
-}
+};
 
 export default OnlineUsers;

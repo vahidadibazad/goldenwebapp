@@ -1,7 +1,7 @@
 // backend/src/modules/cms/services/mediaService.js
-const Media = require('../../models/Media');
-const Category = require('../../models/Category');
-const Tag = require('../../models/Tag');
+const Media = require('../models/Media');
+const Category = require('../../../models/Category');
+const Tag = require('../models/Tag');
 const CacheService = require('../../../services/cacheService');
 const path = require('path');
 const fs = require('fs');

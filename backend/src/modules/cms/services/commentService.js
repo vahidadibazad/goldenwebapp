@@ -1,6 +1,6 @@
 // backend/src/modules/cms/services/commentService.js
-const Comment = require('../../models/Comment');
-const Entry = require('../../models/Entry');
+const Comment = require('../models/Comment');
+const Entry = require('../../../models/Entry');
 const NotificationService = require('../../../services/notificationService');
 const CacheService = require('../../../services/cacheService');
 

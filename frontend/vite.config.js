@@ -16,7 +16,29 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        // ... تنظیمات manifest
+        name: 'مدیریت فناوری اطلاعات',
+        short_name: 'مدیریت IT',
+        description: 'سیستم یکپارچه مدیریت فناوری اطلاعات سازمان',
+        theme_color: '#1e293b',
+        background_color: '#f0f2f5',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: '/icons/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -70,10 +92,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: '0.0.0.0',  // ✅ اصلاح: به جای true، از '0.0.0.0' استفاده کنید
-    hmr: {
-      host: 'localhost',  // ✅ اضافه کنید
-      port: 5173,
-    },
+    host: '0.0.0.0',
+    // ✅ HMR را غیرفعال کنید تا از خطای WebSocket جلوگیری شود
+    hmr: false,
   },
 });

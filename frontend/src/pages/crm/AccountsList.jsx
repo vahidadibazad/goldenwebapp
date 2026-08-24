@@ -31,7 +31,7 @@ import {
   BankOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import crmService from '../../services/crmService';
+import crmService from "../../services/crmService";
 import { toPersianDate } from '../../utils/dateHelper';
 import { COLORS } from '../../styles/theme';
 

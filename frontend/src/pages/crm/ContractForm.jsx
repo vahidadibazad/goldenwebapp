@@ -27,7 +27,7 @@ import {
   CalendarOutlined,
   DollarOutlined,
 } from '@ant-design/icons';
-import crmService from '../../services/crmService';
+import crmService from "../../services/crmService";
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;

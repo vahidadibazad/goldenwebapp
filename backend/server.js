@@ -390,6 +390,7 @@ app.use('/api/cms/tags', require('./src/modules/cms/routes/tagRoutes'));
 // ✅ مسیرهای CRM
 // =============================================
 app.use('/api/crm', require('./src/modules/crm/routes/crmRoutes'));
+app.use('/api/crm', require('./src/modules/crm/routes/crmStatsRoutes'));
 
 // =============================================
 // ✅ مسیرهای پشتیبان‌گیری (Backup)
@@ -674,7 +675,7 @@ app.use((err, req, res, next) => {
 // =============================================
 const PORT = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/goldenweb')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/goldenwebapp')
   .then(async () => {
     logger.success('✅ متصل به MongoDB');
     

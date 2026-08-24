@@ -1,183 +1,100 @@
 // frontend/src/context/SocketContext.jsx
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
-import io from 'socket.io-client';
-import { getSocketUrl } from '../config';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
+import { useAuth } from './AuthContext';
+
+const getSocketURL = () => {
+  const hostname = window.location.hostname;
+  const port = 3000;
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:${port}`;
+  }
+  return `http://${hostname}:${port}`;
+};
 
 const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+  const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const socketRef = useRef(null);
-  const isMounted = useRef(true);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 10;
 
   useEffect(() => {
-    isMounted.current = true;
-
-    const token = localStorage.getItem('token');
-    console.log(`🔑 توکن در SocketContext: ${token ? '✅ موجود' : '❌ ناموجود'}`);
-
-    if (!token) {
-      console.log('ℹ️ توکن یافت نشد، اتصال Socket برقرار نشد');
+    if (!user) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      setIsConnected(false);
       return;
     }
 
-    // ✅ استفاده از تابع getSocketUrl برای دریافت آدرس پویا
-    const SOCKET_URL = getSocketUrl();
-    console.log(`🔌 اتصال به Socket: ${SOCKET_URL}`);
+    if (socketRef.current && socketRef.current.connected) {
+      return;
+    }
 
-    // ✅ تنظیمات Socket.IO با fallback به polling
-    const socketInstance = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['polling', 'websocket'],
-      path: '/socket.io',
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('❌ توکن برای Socket یافت نشد');
+      return;
+    }
+
+    const SOCKET_URL = getSocketURL();
+    console.log('🔌 اتصال به Socket:', SOCKET_URL);
+
+    const socket = io(SOCKET_URL, {
+      transports: ['websocket', 'polling'],
+      auth: {
+        token: token, // ✅ استفاده از auth به جای query
+      },
       reconnection: true,
-      reconnectionAttempts: maxReconnectAttempts,
+      reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 30000,
-      forceNew: true,
-      upgrade: true,
     });
 
-    socketRef.current = socketInstance;
-    setSocket(socketInstance);
+    socketRef.current = socket;
 
-    // =============================================
-    // رویدادهای اتصال
-    // =============================================
-
-    socketInstance.on('connect', () => {
-      if (isMounted.current) {
-        console.log('✅ Socket متصل شد');
-        setIsConnected(true);
-        reconnectAttempts.current = 0;
-      }
+    socket.on('connect', () => {
+      console.log('✅ Socket متصل شد');
+      setIsConnected(true);
     });
 
-    socketInstance.on('disconnect', (reason) => {
-      if (isMounted.current) {
-        console.log(`❌ Socket قطع شد: ${reason}`);
-        setIsConnected(false);
-      }
+    socket.on('disconnect', () => {
+      console.log('❌ Socket قطع شد');
+      setIsConnected(false);
     });
 
-    socketInstance.on('connect_error', (error) => {
-      if (isMounted.current) {
-        console.error('❌ خطا در اتصال Socket:', error.message);
-        setIsConnected(false);
-        
-        // ✅ اگر WebSocket خطا داد، به polling برگرد
-        if (error.message.includes('websocket') || error.message.includes('WebSocket')) {
-          console.log('🔄 تلاش مجدد با transport polling...');
-        }
-      }
+    socket.on('connect_error', (error) => {
+      console.error('❌ خطا در اتصال Socket:', error.message);
     });
 
-    socketInstance.on('reconnect_attempt', (attempt) => {
-      console.log(`🔄 تلاش مجدد: ${attempt}/${maxReconnectAttempts}`);
-      reconnectAttempts.current = attempt;
+    socket.on('online-users', (users) => {
+      console.log('👥 کاربران آنلاین:', users);
+      setOnlineUsers(users);
     });
 
-    socketInstance.on('reconnect_failed', () => {
-      console.error('❌ اتصال مجدد ناموفق بود');
-      if (isMounted.current) {
-        setIsConnected(false);
-      }
+    socket.on('user-online', (userData) => {
+      console.log('🟢 کاربر آنلاین شد:', userData);
+      setOnlineUsers((prev) => [...prev, userData]);
     });
 
-    socketInstance.on('reconnect', () => {
-      console.log('✅ اتصال مجدد با موفقیت انجام شد');
-      if (isMounted.current) {
-        setIsConnected(true);
-        reconnectAttempts.current = 0;
-      }
+    socket.on('user-offline', (userId) => {
+      console.log('🔴 کاربر آفلاین شد:', userId);
+      setOnlineUsers((prev) => prev.filter((u) => u.id !== userId));
     });
-
-    // =============================================
-    // رویدادهای کاربران آنلاین
-    // =============================================
-
-    socketInstance.on('users_online', (users) => {
-      if (isMounted.current) {
-        console.log(`👥 ${users.length} کاربر آنلاین`);
-        setOnlineUsers(users);
-      }
-    });
-
-    socketInstance.on('user_online', (user) => {
-      if (isMounted.current) {
-        console.log(`🟢 کاربر آنلاین شد: ${user.fullName || user.username}`);
-        setOnlineUsers((prev) => {
-          if (prev.find((u) => u.userId === user.userId)) return prev;
-          return [...prev, user];
-        });
-      }
-    });
-
-    socketInstance.on('user_offline', (user) => {
-      if (isMounted.current) {
-        console.log(`🔴 کاربر آفلاین شد: ${user.fullName || user.username}`);
-        setOnlineUsers((prev) => prev.filter((u) => u.userId !== user.userId));
-      }
-    });
-
-    // =============================================
-    // رویدادهای اعلان‌ها
-    // =============================================
-
-    socketInstance.on('notification', (notification) => {
-      if (isMounted.current) {
-        console.log(`🔔 اعلان جدید: ${notification.title}`);
-        setNotifications((prev) => [notification, ...prev]);
-        
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification(notification.title, {
-            body: notification.message,
-            icon: '/icons/icon-192x192.png',
-          });
-        }
-      }
-    });
-
-    // =============================================
-    // پاکسازی
-    // =============================================
 
     return () => {
-      isMounted.current = false;
       if (socketRef.current) {
-        try {
-          if (socketRef.current.connected) {
-            socketRef.current.disconnect();
-          }
-          socketRef.current.removeAllListeners();
-          socketRef.current = null;
-          console.log('🔌 Socket پاکسازی شد');
-        } catch (error) {
-          console.warn('⚠️ خطا در پاکسازی Socket:', error.message);
-        }
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
     };
-  }, []);
-
-  // =============================================
-  // توابع عمومی
-  // =============================================
-
-  const value = {
-    socket,
-    isConnected,
-    onlineUsers,
-    notifications,
-  };
+  }, [user]);
 
   return (
-    <SocketContext.Provider value={value}>
+    <SocketContext.Provider value={{ socket: socketRef.current, isConnected, onlineUsers }}>
       {children}
     </SocketContext.Provider>
   );

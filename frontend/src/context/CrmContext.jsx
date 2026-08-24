@@ -1,6 +1,6 @@
 // frontend/src/context/CrmContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import crmService from '../modules/crm/services/crmService';
+import crmService from '../services/crmService';
 import { useAuth } from './AuthContext';
 
 const CrmContext = createContext();

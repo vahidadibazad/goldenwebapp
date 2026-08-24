@@ -26,11 +26,7 @@ router.put('/:id', protect, checkPermission('crm.edit_opportunities'), validateO
 // تغییر مرحله فرصت
 router.patch('/:id/stage', protect, checkPermission('crm.move_opportunity'), OpportunityController.changeOpportunityStage);
 
-// بستن فرصت (برنده)
-router.patch('/:id/close-won', protect, checkPermission('crm.move_opportunity'), OpportunityController.closeOpportunity);
-
-// بستن فرصت (بازنده)
-router.patch('/:id/close-lost', protect, checkPermission('crm.move_opportunity'), OpportunityController.closeOpportunity);
+// ✅ حذف شد: مسیرهای close-won و close-lost (متد در کنترلر وجود ندارد)
 
 // حذف فرصت
 router.delete('/:id', protect, checkPermission('crm.delete_opportunities'), OpportunityController.deleteOpportunity);

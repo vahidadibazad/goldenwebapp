@@ -1,5 +1,5 @@
 const Lead = require('../models/Lead');
-const CacheService = require('../../../shared/services/cacheService');
+const CacheService = require('../../../services/cacheService');
 
 class LeadService {
 

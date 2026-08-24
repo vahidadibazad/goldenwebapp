@@ -1,5 +1,5 @@
 const OpportunityService = require('../services/opportunityService');
-const logAudit = require('../../../shared/utils/auditLogger');
+const logAudit = require('../../../utils/auditLogger');
 
 class OpportunityController {
 

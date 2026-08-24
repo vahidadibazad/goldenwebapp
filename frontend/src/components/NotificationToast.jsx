@@ -1,26 +1,35 @@
-import { useEffect } from 'react';
+// frontend/src/components/NotificationToast.jsx
+import React, { useEffect } from 'react';
+import { message } from 'antd';
 import { useSocket } from '../context/SocketContext';
-import toast from 'react-hot-toast';
 
-function NotificationToast() {
-  const { notifications } = useSocket();
+const NotificationToast = () => {
+  const { socket } = useSocket();
 
   useEffect(() => {
-    if (notifications.length > 0) {
-      const latest = notifications[0];
-      toast(latest.message, {
-        icon: '🔔',
-        duration: 5000,
+    if (!socket) return; // ✅ اگر socket وجود نداشت، از اجرا خارج شو
+
+    const handleNotification = (data) => {
+      // نمایش اعلان با antd message
+      message.info({
+        content: data.message || 'اعلان جدید',
+        duration: 5,
         style: {
-          borderRadius: '12px',
-          background: '#1e293b',
-          color: '#fff',
+          marginTop: '70px',
         },
       });
-    }
-  }, [notifications]);
+    };
 
-  return null;
-}
+    // گوش دادن به رویدادهای اعلان
+    socket.on('notification', handleNotification);
+
+    // پاکسازی هنگام unmount
+    return () => {
+      socket.off('notification', handleNotification);
+    };
+  }, [socket]);
+
+  return null; // این کامپوننت چیزی نمایش نمی‌دهد
+};
 
 export default NotificationToast;
