@@ -1,3 +1,4 @@
+// frontend/src/components/CredentialForm.jsx
 import { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, Card, Typography, Spin, App } from 'antd';
 import { SaveOutlined, RollbackOutlined } from '@ant-design/icons';
@@ -10,7 +11,7 @@ const { Option } = Select;
 function CredentialForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { message } = App.useApp(); // ✅ فقط از App.useApp()
+  const { message } = App.useApp(); // ✅ اصلاح شده
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);

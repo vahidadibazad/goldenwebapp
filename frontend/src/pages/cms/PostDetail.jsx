@@ -1,7 +1,7 @@
 // frontend/src/pages/cms/PostDetail.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Spin, Typography, Divider, Tag, Button, Space, Avatar, Empty, Row, Col, Form, Input, message } from 'antd'; // ✅ Comment حذف شد
+import { Card, Spin, Typography, Divider, Tag, Button, Space, Avatar, Empty, Row, Col, Form, Input, message } from 'antd';
 import { CalendarOutlined, UserOutlined, EyeOutlined, ArrowLeftOutlined, LikeOutlined, DislikeOutlined } from '@ant-design/icons';
 import cmsService from '../../services/cmsService';
 import { toPersianDate } from '../../utils/dateHelper';
@@ -164,7 +164,7 @@ function PostDetail() {
 
         <Divider style={{ margin: '16px 0' }} />
 
-        {/* ✅ لیست کامنت‌ها با کارت به جای Comment */}
+        {/* ✅ لیست کامنت‌ها با کارت (بدون Comment) */}
         {comments.length === 0 ? (
           <Text type="secondary">هنوز کامنتی ثبت نشده است</Text>
         ) : (
